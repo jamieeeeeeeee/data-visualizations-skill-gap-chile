@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+.bar {
+  fill: #8dd3c7;
+}
+
+.bar:hover {
+  fill: #fb8072;
+}
+
+.title {
+  font: bold 12px "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+.axis, .tick {
+  font: 8px sans-serif;
+}
+
+.source {
+  font: 8px "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.x.axis path {
+  display: none;
+}
+
+/*
+
+Make responsive
+
+https://chartio.com/resources/tutorials/how-to-resize-an-svg-when-the-window-is-resized-in-d3-js/ 
+
+*/
+.svg-container {
+    display: inline-block;
+    position: relative;
+    width: 100%;
+    padding-bottom: 100%;
+    vertical-align: top;
+    overflow: hidden;
+}
+.svg-content {
+    display: inline-block;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+/*
+
+Add tool tip
+
+https://bl.ocks.org/alandunning/7008d0332cc28a826b37b3cf6e7bd998
+
+*/
+.toolTip {
+  position: absolute;
+  display: none;
+  min-width: 80px;
+  height: auto;
+  background: none repeat scroll 0 0 #ffffff;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  border-radius: 1px;
+  font: 12px "Helvetica Neue", Helvetica, Arial, sans-serif;
+
+}
+
+</style>
+<body>
+  <div id="container" class="svg-container">
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.6.0/d3.js"></script>
+<script>
+
+var margin = {top: 40, right: 40, bottom: 40, left: 150},
+    width = 500 - margin.left - margin.right,
+    height = 500 - margin.top - margin.bottom;
+
+var x = d3.scaleLinear().rangeRound([0, width]);
+
+var y = d3.scaleBand()
+    .rangeRound([height,0]).padding(0.2);
+
+/*
+var xAxis = d3.svg.axis()
+    .scale(x)
+    .orient("bottom");
+
+var yAxis = d3.svg.axis()
+    .scale(y)
+    .orient("left");
+    //.ticks(8, "%");
+*/
+
+var svg = d3.select("div#container").append("svg")
+  .attr("preserveAspectRatio", "xMinYMin meet")
+  .attr("viewBox", "0 0 500 500")
+  .classed("svg-content", true)
+  .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+var tooltip = d3.select("body").append("div").attr("class", "toolTip");
+
+d3.tsv("tp-grad-rates-en-cleaned.tsv", type, function(error, data) {
+  
+  //data is already sorted
+
+  //sort data
+  //data.sort(function(a,b) { return a.value - b.value; });
+
+  y.domain(data.map(function(d) { return d.name; }));
+  x.domain([0, d3.max(data, function(d) { return d.value; })]);
+
+
+//append x axis to svg
+  svg.append("g")
+    .attr("class", "axis")
+    .attr("transform", "translate(0," + height + ")")
+    .call(d3.axisBottom(x))
+    .append("text")
+    .attr("y", 25)
+    .attr("x", 260)
+    .attr("dy", "0.5em")
+    .style("fill", "black")
+    .text("Number of graduates");
+
+  //append y axis to svg
+  svg.append("g")
+    .attr("class", "axis")
+    .call(d3.axisLeft(y));
+
+  svg.selectAll(".bar")
+      .data(data)
+    .enter().append("rect")
+      .attr("class", "bar")
+      .attr("x", 0.75)
+      .attr("y", function(d) { return y(d.name); })
+      .attr("height", y.bandwidth())
+      .attr("width", function(d) { return x(d.value); })
+      .on("mousemove", function(d){
+        tooltip
+          .style("left", d3.event.pageX - 50 + "px")
+          .style("top", d3.event.pageY - 70 + "px")
+          .style("display", "inline-block")
+          .html("<b>" +(d.name) + "</b>: " + (d.value) + " graduates" );
+    })
+    .on("mouseout", function(d){ tooltip.style("display", "none");});
+
+});
+
+  //define chart title to svg
+  let title = svg.append("g")
+    .attr("class", "title");
+  title.append("text")
+    .attr("x", -130)
+      .attr("y", -10)
+      .attr("class", "title")
+      .text("Graduates by specialty in Chilean techno-professional high schools, 2012");
+
+
+  //append source data to svg
+  let source = svg.append("g")
+    .attr("class", "source");
+  source.append("text")
+    .attr("x", -130)
+    .attr("y", 458)
+    .attr("text-anchor", "left")
+    .text("Source: Chile Ministry of Education, 2012");
+
+
+function type(d) {
+  d.value = +d.value;
+  return d;
+}
+
+</script>
