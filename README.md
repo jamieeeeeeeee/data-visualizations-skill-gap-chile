@@ -1,4 +1,4 @@
-#Data visualizations that tell the story of the skill gap in Chile.
+# Data visualizations that tell the story of the skill gap in Chile.
 
 As part of a Fulbright-sponsored research project, I analyzed publicly available data to quantify the skill gap in Chile. 
 
