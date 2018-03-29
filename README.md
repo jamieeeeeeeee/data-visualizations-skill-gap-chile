@@ -6,3 +6,5 @@ These data visualizations help tell the story here. In the Chilean job market, p
 
 These findings inspired my initiaitve to create project-based curriculum that teaches computer programming in low-resource public schools. 
 
+[The full story can be read here.](https://startupschools.cl/stem-education-in-chile/skills-teach-high-school-students-chile/)
+
